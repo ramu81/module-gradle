@@ -1,0 +1,47 @@
+apply plugin: 'java'
+
+repositories {
+	mavenCentral()
+}
+
+test {
+	useJUnitPlatform()
+}
+
+sourceCompatibility = 14
+
+dependencies {
+	implementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+	testRuntimeOnly 'org.junit.platform:junit-platform-console:1.5.2'
+}
+
+compileTestJava {
+	doFirst {
+		options.compilerArgs = [
+			'--module-path', classpath.asPath,
+			'--add-modules', 'edu.chinna.kadhira.util' ,
+			'--add-modules', 'org.junit.jupiter.api',
+			'--add-reads', 'edu.chinna.kadhira.util=org.junit.jupiter.api',
+			'--patch-module', 'edu.chinna.kadhira.util='+
+			files(sourceSets.test.java.srcDirs).asPath
+		]
+	}
+}
+
+test {
+	doFirst {
+		jvmArgs = [
+			'--module-path', classpath.asPath,
+			'--add-modules', 'edu.chinna.kadhira.util' ,
+			'--add-modules', 'org.junit.jupiter.api',
+			'--add-modules', 'org.junit.platform.launcher',
+			'--add-reads', 'edu.chinna.kadhira.util=org.junit.jupiter.api',
+			'--add-opens', 'edu.chinna.kadhira.util/edu.chinna.kadhira=org.junit.platform.commons',
+			'--patch-module', 'edu.chinna.kadhira.util='+
+			files(sourceSets.test.java.outputDir).asPath
+		]
+	}
+}
+
+defaultTasks 'clean', 'test'
